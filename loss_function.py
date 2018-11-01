@@ -23,7 +23,7 @@ def dice_loss_2d(Y_gt, Y_pred):
     return loss
 
 
-def twersky_loss_3d(Y_gt, Y_pred):
+def tversky_loss_3d(Y_gt, Y_pred):
     smooth = 1e-5
     alpha = 0.5
     beta = 0.5
@@ -41,7 +41,7 @@ def twersky_loss_3d(Y_gt, Y_pred):
     return loss
 
 
-def twersky_loss_2d(Y_gt, Y_pred):
+def tversky_loss_2d(Y_gt, Y_pred):
     smooth = 1e-5
     alpha = 0.5
     beta = 0.5
@@ -59,7 +59,7 @@ def twersky_loss_2d(Y_gt, Y_pred):
     return loss
 
 
-def generalized_dice_loss_3d(Y_gt, Y_pred):
+def generalised_dice_loss_3d(Y_gt, Y_pred):
     smooth = 1e-5
     Ncl = tf.shape(Y_pred)[-1]
     w = tf.zeros(shape=(Ncl,))
@@ -79,7 +79,7 @@ def generalized_dice_loss_3d(Y_gt, Y_pred):
     return loss
 
 
-def generalized_dice_loss_2d(Y_gt, Y_pred):
+def generalised_dice_loss_2d(Y_gt, Y_pred):
     smooth = 1e-5
     Ncl = tf.shape(Y_pred)[-1]
     w = tf.zeros(shape=(Ncl,))
