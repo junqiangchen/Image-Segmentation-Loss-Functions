@@ -8,7 +8,7 @@ def dice_loss_3d(Y_gt, Y_pred):
     true_flat = tf.reshape(Y_gt, [-1, H * W * C * Z])
     intersection = 2 * tf.reduce_sum(pred_flat * true_flat, axis=1) + smooth
     denominator = tf.reduce_sum(pred_flat, axis=1) + tf.reduce_sum(true_flat, axis=1) + smooth
-    loss = -tf.reduce_mean(intersection / denominator)
+    loss = 1 - tf.reduce_mean(intersection / denominator)
     return loss
 
 
@@ -19,41 +19,61 @@ def dice_loss_2d(Y_gt, Y_pred):
     true_flat = tf.reshape(Y_gt, [-1, H * W * C])
     intersection = 2 * tf.reduce_sum(pred_flat * true_flat, axis=1) + smooth
     denominator = tf.reduce_sum(pred_flat, axis=1) + tf.reduce_sum(true_flat, axis=1) + smooth
-    loss = -tf.reduce_mean(intersection / denominator)
+    loss = 1 - tf.reduce_mean(intersection / denominator)
     return loss
 
 
-def tversky_loss_3d(Y_gt, Y_pred):
+def tversky_loss_3d(Y_gt, Y_pred, alpha=0.7):
+    Z, H, W, C = Y_gt.get_shape().as_list()[1:]
     smooth = 1e-5
-    alpha = 0.5
-    beta = 0.5
-    ones = tf.ones(tf.shape(Y_gt))
-    p0 = Y_pred
-    p1 = ones - Y_pred
-    g0 = Y_gt
-    g1 = ones - Y_gt
-    num = tf.reduce_sum(p0 * g0, axis=[1, 2, 3])
-    den = num + alpha * tf.reduce_sum(p0 * g1, axis=[1, 2, 3]) + \
-          beta * tf.reduce_sum(p1 * g0, axis=[1, 2, 3]) + smooth
-    tversky = tf.reduce_sum(num / den, axis=1)
-    loss = tf.reduce_mean(1 - tversky)
+    y_pred_pos = tf.reshape(Y_pred, [-1, H * W * C * Z])
+    y_true_pos = tf.reshape(Y_gt, [-1, H * W * C * Z])
+    true_pos = tf.reduce_sum(y_true_pos * y_pred_pos, axis=1)
+    false_neg = tf.reduce_sum(y_true_pos * (1 - y_pred_pos), axis=1)
+    false_pos = tf.reduce_sum((1 - y_true_pos) * y_pred_pos, axis=1)
+    tversky = (true_pos + smooth) / (true_pos + alpha * false_neg + (1 - alpha) * false_pos + smooth)
+    loss = 1 - tf.reduce_mean(tversky)
     return loss
 
 
-def tversky_loss_2d(Y_gt, Y_pred):
+def tversky_loss_2d(Y_gt, Y_pred, alpha=0.7):
+    H, W, C = Y_gt.get_shape().as_list()[1:]
     smooth = 1e-5
-    alpha = 0.5
-    beta = 0.5
-    ones = tf.ones(tf.shape(Y_gt))
-    p0 = Y_pred
-    p1 = ones - Y_pred
-    g0 = Y_gt
-    g1 = ones - Y_gt
-    num = tf.reduce_sum(p0 * g0, axis=[1, 2])
-    den = num + alpha * tf.reduce_sum(p0 * g1, axis=[1, 2]) + \
-          beta * tf.reduce_sum(p1 * g0, axis=[1, 2]) + smooth
-    tversky = tf.reduce_sum(num / den, axis=1)
-    loss = tf.reduce_mean(1 - tversky)
+    y_pred_pos = tf.reshape(Y_pred, [-1, H * W * C])
+    y_true_pos = tf.reshape(Y_gt, [-1, H * W * C])
+    true_pos = tf.reduce_sum(y_true_pos * y_pred_pos, axis=1)
+    false_neg = tf.reduce_sum(y_true_pos * (1 - y_pred_pos), axis=1)
+    false_pos = tf.reduce_sum((1 - y_true_pos) * y_pred_pos, axis=1)
+    tversky = (true_pos + smooth) / (true_pos + alpha * false_neg + (1 - alpha) * false_pos + smooth)
+    loss = 1 - tf.reduce_mean(tversky)
+    return loss
+
+
+def focal_tversky_3d(Y_gt, Y_pred, alpha=0.7, gamma=0.75):
+    Z, H, W, C = Y_gt.get_shape().as_list()[1:]
+    smooth = 1e-5
+    y_pred_pos = tf.reshape(Y_pred, [-1, H * W * C * Z])
+    y_true_pos = tf.reshape(Y_gt, [-1, H * W * C * Z])
+    true_pos = tf.reduce_sum(y_true_pos * y_pred_pos, axis=1)
+    false_neg = tf.reduce_sum(y_true_pos * (1 - y_pred_pos), axis=1)
+    false_pos = tf.reduce_sum((1 - y_true_pos) * y_pred_pos, axis=1)
+    tversky = (true_pos + smooth) / (true_pos + alpha * false_neg + (1 - alpha) * false_pos + smooth)
+    loss = 1 - tf.reduce_mean(tversky)
+    loss = tf.pow(loss, gamma)
+    return loss
+
+
+def focal_tversky_2d(Y_gt, Y_pred, alpha=0.7, gamma=0.75):
+    H, W, C = Y_gt.get_shape().as_list()[1:]
+    smooth = 1e-5
+    y_pred_pos = tf.reshape(Y_pred, [-1, H * W * C])
+    y_true_pos = tf.reshape(Y_gt, [-1, H * W * C])
+    true_pos = tf.reduce_sum(y_true_pos * y_pred_pos, axis=1)
+    false_neg = tf.reduce_sum(y_true_pos * (1 - y_pred_pos), axis=1)
+    false_pos = tf.reduce_sum((1 - y_true_pos) * y_pred_pos, axis=1)
+    tversky = (true_pos + smooth) / (true_pos + alpha * false_neg + (1 - alpha) * false_pos + smooth)
+    loss = 1 - tf.reduce_mean(tversky)
+    loss = tf.pow(loss, gamma)
     return loss
 
 
