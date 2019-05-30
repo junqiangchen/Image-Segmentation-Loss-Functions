@@ -128,13 +128,13 @@ def generalised_dice_loss_2d(Y_gt, Y_pred):
 
 
 def surface_loss_3d(Y_gt, Y_pred):
-    multipled = tf.reduce_sum(Y_gt * Y_pred, axis=[1, 2, 3, 4])
+    multipled = tf.reduce_sum(Y_gt * Y_pred, axis=[0,1, 2, 3, 4])
     loss = tf.reduce_mean(multipled)
     return loss
 
 
 def surface_loss_2d(Y_gt, Y_pred):
-    multipled = tf.reduce_sum(Y_gt * Y_pred, axis=[1, 2, 3])
+    multipled = tf.reduce_sum(Y_gt * Y_pred, axis=[0,1, 2, 3])
     loss = tf.reduce_mean(multipled)
     return loss
 
