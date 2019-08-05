@@ -139,6 +139,31 @@ def surface_loss_2d(Y_gt, Y_pred):
     return loss
 
 
+def focal_loss_sigmodv1(Y_gt, Y_pred,alpha=0.25, gamma=2):
+   epsilon = 1e-5
+   pt_1 = tf.where(tf.equal(Y_gt, 1), Y_pred, tf.ones_like(Y_pred))
+   pt_0 = tf.where(tf.equal(Y_gt, 0), Y_pred, tf.zeros_like(Y_pred))
+   # clip to prevent NaN's and Inf's
+   pt_1 = tf.clip_by_value(pt_1, epsilon, 1. - epsilon)
+   pt_0 = tf.clip_by_value(pt_0, epsilon, 1. - epsilon)
+   loss_1 = -alpha * tf.pow(1. - pt_1, gamma) * tf.log(pt_1)
+   loss_0 = -(1 - alpha) * tf.pow(pt_0, gamma) * tf.log(1. - pt_0)
+   loss = tf.reduce_sum(loss_1 + loss_0)
+   return loss
+
+
+def focal_loss_sigmodv2(Y_gt, Y_pred,alpha=0.25, gamma=2):
+   epsilon = 1e-5
+    y_pred = tf.clip_by_value(y_pred, epsilon, 1 - epsilon)
+    logits = tf.log(y_pred / (1 - y_pred))
+    weight_a = alpha * tf.pow((1 - y_pred), gamma) * y_true
+    weight_b = (1 - alpha) * tf.pow(y_pred, gamma) * (1 - y_true)
+    loss = tf.log1p(tf.exp(-logits)) * (weight_a + weight_b) + logits * weight_b
+    return tf.reduce_sum(loss)
+   return loss
+
+
+
 x = tf.constant(value=5., shape=(3, 32, 32, 32, 1))
 y = tf.constant(value=1., shape=(3, 32, 32, 32, 1))
 surface_loss_3d(x, y)
