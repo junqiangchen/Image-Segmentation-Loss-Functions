@@ -1,6 +1,15 @@
 import tensorflow as tf
 
 
+def binary_crossentropy(Y_pred, Y_gt):
+    epsilon = 1.e-5
+    Y_pred = tf.clip_by_value(Y_pred, epsilon, 1. - epsilon)
+    logits = tf.log(Y_pred / (1 - Y_pred))
+    loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=Y_gt, logits=logits)
+    loss = tf.reduce_mean(loss)
+    return loss
+
+
 def dice_loss_3d(Y_gt, Y_pred):
     Z, H, W, C = Y_gt.get_shape().as_list()[1:]
     smooth = 1e-5
