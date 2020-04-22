@@ -1,3 +1,5 @@
+import tensorflow as tf
+
 def categorical_crossentropy(Y_pred, Y_gt):
     """
     Categorical crossentropy between an output and a target
@@ -166,3 +168,40 @@ def categorical_dicePfocalloss(Y_pred, Y_gt, alpha, lamda=0.5, gamma=2.):
     loss2 = tf.reduce_mean(weight_loss * loss)
     total_loss = (1 - lamda) * (1 - loss1) + lamda * loss2
     return total_loss
+	
+	
+def ssim2d_loss(Y_pred, Y_gt, maxlabel):
+    """
+    Computes SSIM index between Y_pred and Y_gt.only calculate 2d image,3d image can use it,but not actual ssim3d
+    :param Y_pred:A tensor resulting from a softmax(-1,z,h,w,numclass)
+    :param Y_gt:A tensor of the same shape as `y_pred`
+    :param maxlabel:maxlabelvalue
+    :return:ssim_loss
+    """
+    loss = tf.image.ssim(Y_pred, Y_gt, maxlabel)
+    loss = tf.reduce_mean(loss)
+    return loss
+
+
+def multiscalessim2d_loss(Y_pred, Y_gt, maxlabel, downsampledfactor=4):
+    """
+    Computes the MS-SSIM between Y_pred and Y_gt.only calculate 2d image,3d image can use it,but not actual multiscalessim3d
+    :param Y_pred:A tensor resulting from a softmax(-1,z,h,w,numclass)
+    :param Y_gt:A tensor of the same shape as `y_pred`
+    :param maxlabel:maxlabelvalue
+    :param downsampledfactor:downsample factor depend on input imagesize
+    :return:multiscalessim_loss
+    """
+    if downsampledfactor >= 5:
+        _MSSSIM_WEIGHTS = (0.0448, 0.2856, 0.3001, 0.2363, 0.1333)
+    if downsampledfactor == 4:
+        _MSSSIM_WEIGHTS = (0.0448, 0.2856, 0.3001, 0.2363)
+    if downsampledfactor == 3:
+        _MSSSIM_WEIGHTS = (0.0448, 0.2856, 0.3001)
+    if downsampledfactor == 2:
+        _MSSSIM_WEIGHTS = (0.0448, 0.2856)
+    if downsampledfactor <= 1:
+        _MSSSIM_WEIGHTS = (0.0448)
+    loss = tf.image.ssim_multiscale(Y_pred, Y_gt, maxlabel, power_factors=_MSSSIM_WEIGHTS)
+    loss = tf.reduce_mean(loss)
+    return loss

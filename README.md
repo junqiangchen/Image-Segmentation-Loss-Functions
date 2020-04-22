@@ -3,7 +3,12 @@
 
 ## How to Use
 i have reimplemented the image segmentation loss functions with tensorflow1.8.0.
-there are binary_crossentropy,dice_loss,tversky_loss,focal_tversky,generalised_dice_loss,surface_loss,focal_loss_sigmod all has 2d and 3d version.including categorical loss functions of crossentropy,dice_loss,focal_loss etc.
+
+there are binary_crossentropy,dice_loss,tversky_loss,focal_tversky,generalised_dice_loss,surface_loss,focal_loss_sigmod all has 2d and 3d version.
+
+including categorical loss functions of crossentropy,dice_loss,focal_loss etc.
+
+MS-SSIM loss and SSIM loss for calculating image similarity
 
 ## Contact
 * https://github.com/junqiangchen
